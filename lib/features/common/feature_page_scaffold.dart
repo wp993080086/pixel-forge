@@ -51,8 +51,10 @@ class RequirementList extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(Icons.construction,
-                      color: Theme.of(context).colorScheme.primary),
+                  Icon(
+                    Icons.construction,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(child: Text(header)),
                 ],

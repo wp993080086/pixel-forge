@@ -21,8 +21,21 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    # 禁止 print：统一走 AppLogger（见 AGENTS.md 编码规范）
+    avoid_print: true
+    # 字符串统一单引号
+    prefer_single_quotes: true
+    # 多行参数末尾必须有逗号（配合 dart format 稳定换行）
+    require_trailing_commas: true
+    # 优先 const 构造，减少重建
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    # 禁止隐式 dynamic 与冗余类型标注
+    always_declare_return_types: true
+    # 明确可空与集合写法
+    prefer_final_locals: true
+    # 异步：避免无 await 的 async
+    unnecessary_await_in_return: true
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

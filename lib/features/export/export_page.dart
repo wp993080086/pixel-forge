@@ -38,9 +38,9 @@ class ExportPage extends StatelessWidget {
     return DefaultTabController(
       length: ExportTab.values.length,
       initialIndex: initialTab.index,
-      child: FeaturePageScaffold(
+      child: const FeaturePageScaffold(
         title: '导出',
-        bottom: const TabBar(
+        bottom: TabBar(
           tabs: [
             Tab(text: '格式转换'),
             Tab(text: '压缩'),
@@ -48,11 +48,11 @@ class ExportPage extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            const RequirementList(
+            RequirementList(
               points: _convertPoints,
               header: '格式与压缩参数同屏生效，导出时只编码一次。以下为需求要点：',
             ),
-            const RequirementList(
+            RequirementList(
               points: _compressPoints,
               header: '格式与压缩参数同屏生效，导出时只编码一次。以下为需求要点：',
             ),

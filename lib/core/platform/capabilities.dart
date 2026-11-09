@@ -45,52 +45,52 @@ class PlatformCapabilities {
 
   /// 所有可导入格式的扩展名并集（供文件选择器过滤）。
   List<String> get importExtensions => [
-        for (final f in importFormats) ...f.extensions,
-      ];
+    for (final f in importFormats) ...f.extensions,
+  ];
 
   /// PRD 七章：按端给出能力矩阵。
   static PlatformCapabilities of(AppTarget target) => switch (target) {
-        AppTarget.windows => PlatformCapabilities(
-            target: target,
-            importFormats: _fullImport,
-            exportFormats: {..._mainstreamExport, ImageFormat.ico},
-            dragDropImport: true,
-            pasteImport: false,
-            albumPickImport: false,
-            systemSavePanel: true,
-            animatedReencode: true,
-          ),
-        AppTarget.harmony || AppTarget.android => PlatformCapabilities(
-            target: target,
-            importFormats: _mainstreamImport,
-            exportFormats: {..._mainstreamExport, ImageFormat.ico},
-            dragDropImport: false,
-            pasteImport: false,
-            albumPickImport: false,
-            systemSavePanel: true,
-            animatedReencode: true,
-          ),
-        AppTarget.web => PlatformCapabilities(
-            target: target,
-            importFormats: _mainstreamImport,
-            exportFormats: _mainstreamExport,
-            dragDropImport: false,
-            pasteImport: true,
-            albumPickImport: false,
-            systemSavePanel: false,
-            animatedReencode: false,
-          ),
-        AppTarget.wechatMini => PlatformCapabilities(
-            target: target,
-            importFormats: _mainstreamImport,
-            exportFormats: _mainstreamExport,
-            dragDropImport: false,
-            pasteImport: false,
-            albumPickImport: true,
-            systemSavePanel: false,
-            animatedReencode: false,
-          ),
-      };
+    AppTarget.windows => PlatformCapabilities(
+      target: target,
+      importFormats: _fullImport,
+      exportFormats: {..._mainstreamExport, ImageFormat.ico},
+      dragDropImport: true,
+      pasteImport: false,
+      albumPickImport: false,
+      systemSavePanel: true,
+      animatedReencode: true,
+    ),
+    AppTarget.harmony || AppTarget.android => PlatformCapabilities(
+      target: target,
+      importFormats: _mainstreamImport,
+      exportFormats: {..._mainstreamExport, ImageFormat.ico},
+      dragDropImport: false,
+      pasteImport: false,
+      albumPickImport: false,
+      systemSavePanel: true,
+      animatedReencode: true,
+    ),
+    AppTarget.web => PlatformCapabilities(
+      target: target,
+      importFormats: _mainstreamImport,
+      exportFormats: _mainstreamExport,
+      dragDropImport: false,
+      pasteImport: true,
+      albumPickImport: false,
+      systemSavePanel: false,
+      animatedReencode: false,
+    ),
+    AppTarget.wechatMini => PlatformCapabilities(
+      target: target,
+      importFormats: _mainstreamImport,
+      exportFormats: _mainstreamExport,
+      dragDropImport: false,
+      pasteImport: false,
+      albumPickImport: true,
+      systemSavePanel: false,
+      animatedReencode: false,
+    ),
+  };
 
   /// 主流格式全集（非小众，PRD 一.边界3）。
   static const _mainstreamImport = {

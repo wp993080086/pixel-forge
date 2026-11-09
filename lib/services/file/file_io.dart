@@ -4,5 +4,4 @@
 /// 该文件按条件导出实现，避免在 Web 编译时引入 dart:io。
 library;
 
-export 'file_io_unsupported.dart'
-    if (dart.library.io) 'file_io_native.dart';
+export 'file_io_unsupported.dart' if (dart.library.io) 'file_io_native.dart';

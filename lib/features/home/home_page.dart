@@ -39,14 +39,9 @@ class _HomePageState extends ConsumerState<HomePage> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _ImportCard(
-                caps: caps,
-                imported: _imported,
-                onImport: _import,
-              ),
+              _ImportCard(caps: caps, imported: _imported, onImport: _import),
               const SizedBox(height: 16),
-              Text('功能',
-                  style: Theme.of(context).textTheme.titleMedium),
+              Text('功能', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               const _FeatureGrid(),
             ],
@@ -86,11 +81,15 @@ class _ImportCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('导入图片',
-                          style: Theme.of(context).textTheme.titleMedium),
+                      Text(
+                        '导入图片',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                       if (hints.isNotEmpty)
-                        Text(hints.join(' · '),
-                            style: Theme.of(context).textTheme.bodySmall),
+                        Text(
+                          hints.join(' · '),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
                     ],
                   ),
                 ),
