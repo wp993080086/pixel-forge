@@ -1,22 +1,14 @@
 {
-  "workbench.colorCustomizations": {
-    "activityBar.activeBackground": "#eb73b2",
-    "activityBar.background": "#eb73b2",
-    "activityBar.foreground": "#15202b",
-    "activityBar.inactiveForeground": "#15202b99",
-    "activityBarBadge.background": "#c2ef8f",
-    "activityBarBadge.foreground": "#15202b",
-    "commandCenter.border": "#e7e7e799",
-    "statusBar.background": "#e4479a",
-    "statusBar.foreground": "#e7e7e7",
-    "statusBarItem.hoverBackground": "#eb73b2",
-    "statusBarItem.remoteBackground": "#e4479a",
-    "statusBarItem.remoteForeground": "#e7e7e7",
-    "tab.activeBorder": "#eb73b2",
-    "titleBar.activeBackground": "#e4479a",
-    "titleBar.activeForeground": "#e7e7e7",
-    "titleBar.inactiveBackground": "#e4479a99",
-    "titleBar.inactiveForeground": "#e7e7e799"
+  // 统一换行符为 LF（与 .gitattributes 保持一致）
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  // Dart/Flutter 保存时格式化
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "Dart-Code.dart-code",
+    "editor.rulers": [80]
   },
-  "peacock.color": "#e4479a"
+  "dart.flutterSdkPath": null,
+  "dart.runPubGetOnPubspecChanges": "always"
 }
