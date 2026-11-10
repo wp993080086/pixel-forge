@@ -1,9 +1,11 @@
 import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/image/image_format.dart';
 import '../../core/image/format_detector.dart';
+import '../../core/platform/app_platform.dart';
 import '../../core/platform/capabilities.dart';
 
 /// 导入结果。
@@ -73,3 +75,8 @@ class ImportService {
     );
   }
 }
+
+/// 导入服务 provider（供状态机控制器读取）。
+final importServiceProvider = Provider<ImportService>(
+  (ref) => ImportService(PlatformCapabilities.of(AppPlatform.current)),
+);
