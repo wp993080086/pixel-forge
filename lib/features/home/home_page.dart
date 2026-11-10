@@ -108,6 +108,7 @@ class _ImportCard extends StatelessWidget {
                 title: Text(imported!.fileName),
                 subtitle: Text(
                   '${imported!.format?.displayName ?? '未知格式'} · ${imported!.sizeDisplay}'
+                  '${imported!.isAnimated ? ' · 动图' : ''}'
                   '${imported!.format?.supportsAlpha == true ? ' · 含透明通道' : ''}',
                 ),
               ),

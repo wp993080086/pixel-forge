@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:file_selector/file_selector.dart';
 
 import '../../core/image/image_format.dart';
+import '../../core/image/format_detector.dart';
 import '../../core/platform/capabilities.dart';
 
 /// 导入结果。
@@ -11,13 +12,21 @@ class ImportResult {
     required this.fileName,
     required this.bytes,
     required this.format,
+    required this.isAnimated,
+    required this.extensionMismatch,
   });
 
   final String fileName;
   final Uint8List bytes;
 
-  /// 按扩展名推断的格式；未知扩展名时为 null。
+  /// 格式：优先按文件内容（magic bytes）判定，无法识别时回退扩展名（PRD 一.5）。
   final ImageFormat? format;
+
+  /// 是否为动图（APNG / 动图 WebP / GIF）。
+  final bool isAnimated;
+
+  /// 扩展名与内容不一致（内容可识别且与扩展名推断结果不同）。
+  final bool extensionMismatch;
 
   int get sizeInBytes => bytes.length;
 
@@ -51,10 +60,16 @@ class ImportService {
 
     final bytes = await file.readAsBytes();
     final ext = file.name.split('.').last;
+    final byExt = ImageFormat.fromExtension(ext);
+    final detected = ImageFormatDetector.detect(bytes);
+    // 以内容为准；内容无法识别时回退扩展名（PRD 一.5）。
+    final format = detected?.format ?? byExt;
     return ImportResult(
       fileName: file.name,
       bytes: bytes,
-      format: ImageFormat.fromExtension(ext),
+      format: format,
+      isAnimated: detected?.isAnimated ?? false,
+      extensionMismatch: detected != null && byExt != null && byExt != format,
     );
   }
 }
