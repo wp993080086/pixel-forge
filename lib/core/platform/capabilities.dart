@@ -14,6 +14,7 @@ class PlatformCapabilities {
     required this.albumPickImport,
     required this.systemSavePanel,
     required this.animatedReencode,
+    required this.maxPixels,
   });
 
   final AppTarget target;
@@ -39,6 +40,11 @@ class PlatformCapabilities {
   /// 动图重编码（GIF/APNG 重新导出，高阶可选功能）。
   final bool animatedReencode;
 
+  /// 像素上限（PRD 九.3 表）：超过则拒绝，不做降级。
+  ///
+  /// 依据：Windows 100MP、Android/鸿蒙 32MP、Web 桌面 50MP、Web 移动 16MP。
+  final int maxPixels;
+
   bool canImport(ImageFormat f) => importFormats.contains(f);
 
   bool canExport(ImageFormat f) => exportFormats.contains(f);
@@ -59,6 +65,7 @@ class PlatformCapabilities {
       albumPickImport: false,
       systemSavePanel: true,
       animatedReencode: true,
+      maxPixels: 100 * 1000 * 1000,
     ),
     AppTarget.harmony || AppTarget.android => PlatformCapabilities(
       target: target,
@@ -69,6 +76,7 @@ class PlatformCapabilities {
       albumPickImport: false,
       systemSavePanel: true,
       animatedReencode: true,
+      maxPixels: 32 * 1000 * 1000,
     ),
     AppTarget.web => PlatformCapabilities(
       target: target,
@@ -79,6 +87,8 @@ class PlatformCapabilities {
       albumPickImport: false,
       systemSavePanel: false,
       animatedReencode: false,
+      // 取桌面浏览器上限；移动浏览器 16MP 需运行时判定（PRD 附录 #15 待实测）
+      maxPixels: 50 * 1000 * 1000,
     ),
     AppTarget.wechatMini => PlatformCapabilities(
       target: target,
@@ -89,6 +99,7 @@ class PlatformCapabilities {
       albumPickImport: true,
       systemSavePanel: false,
       animatedReencode: false,
+      maxPixels: 16 * 1000 * 1000,
     ),
   };
 

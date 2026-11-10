@@ -4,33 +4,26 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
 import '../../core/di/providers.dart';
+import '../../core/error/app_error.dart';
 import '../../core/image/image_format.dart';
 import '../../core/platform/capabilities.dart';
-import '../../services/file/import_service.dart';
+import '../editor/editor_controller.dart';
+import '../editor/editor_state.dart';
 
 /// 首页：图片导入入口 + MVP 功能入口。
 ///
 /// 四个入口对应三个页面：裁剪、尺寸与比例、导出（格式转换与图片压缩共用
 /// 同一导出面板，仅默认聚焦的 Tab 不同，见 PRD 四章首 / 十三章）。
-class HomePage extends ConsumerStatefulWidget {
+///
+/// 导入能力（读取文件头、像素预检、Isolate 解码生成预览图）统一由
+/// [editorControllerProvider] 承担，功能页与首页共用同一份状态。
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  ConsumerState<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends ConsumerState<HomePage> {
-  ImportResult? _imported;
-
-  Future<void> _import() async {
-    final result = await ref.read(importServiceProvider).pickImage();
-    if (result == null) return;
-    setState(() => _imported = result);
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final caps = ref.watch(capabilitiesProvider);
+    final state = ref.watch(editorControllerProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('像素工坊')),
       body: Center(
@@ -39,11 +32,16 @@ class _HomePageState extends ConsumerState<HomePage> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _ImportCard(caps: caps, imported: _imported, onImport: _import),
+              _ImportCard(
+                caps: caps,
+                state: state,
+                onImport: () =>
+                    ref.read(editorControllerProvider.notifier).pickAndLoad(),
+              ),
               const SizedBox(height: 16),
               Text('功能', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
-              const _FeatureGrid(),
+              _FeatureGrid(enabled: state.canEdit),
             ],
           ),
         ),
@@ -55,12 +53,12 @@ class _HomePageState extends ConsumerState<HomePage> {
 class _ImportCard extends StatelessWidget {
   const _ImportCard({
     required this.caps,
-    required this.imported,
+    required this.state,
     required this.onImport,
   });
 
   final PlatformCapabilities caps;
-  final ImportResult? imported;
+  final EditorState state;
   final VoidCallback onImport;
 
   @override
@@ -69,6 +67,8 @@ class _ImportCard extends StatelessWidget {
       if (caps.dragDropImport) '支持拖拽导入',
       if (caps.pasteImport) '支持粘贴导入',
     ];
+    final imported = state.imported;
+    final decoded = state.decoded;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -94,22 +94,33 @@ class _ImportCard extends StatelessWidget {
                   ),
                 ),
                 FilledButton.icon(
-                  onPressed: onImport,
+                  onPressed: state.busy ? null : onImport,
                   icon: const Icon(Icons.file_open),
                   label: const Text('选择文件'),
                 ),
               ],
             ),
-            if (imported != null) ...[
+            if (state.busy) ...[
+              const Divider(height: 24),
+              const LinearProgressIndicator(),
+              const SizedBox(height: 8),
+              Text(state.phase.label),
+            ],
+            if (state.failure != null) ...[
+              const Divider(height: 24),
+              _ImportFailure(failure: state.failure!, onRetry: onImport),
+            ],
+            if (imported != null && decoded != null) ...[
               const Divider(height: 24),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.image_outlined),
-                title: Text(imported!.fileName),
+                title: Text(imported.fileName),
                 subtitle: Text(
-                  '${imported!.format?.displayName ?? '未知格式'} · ${imported!.sizeDisplay}'
-                  '${imported!.isAnimated ? ' · 动图' : ''}'
-                  '${imported!.format?.supportsAlpha == true ? ' · 含透明通道' : ''}',
+                  '${imported.format?.displayName ?? '未知格式'} · ${imported.sizeDisplay}'
+                  ' · ${decoded.sourceSize.width}×${decoded.sourceSize.height}'
+                  '${imported.isAnimated ? ' · 动图' : ''}'
+                  '${imported.format?.supportsAlpha == true ? ' · 含透明通道' : ''}',
                 ),
               ),
             ],
@@ -120,8 +131,44 @@ class _ImportCard extends StatelessWidget {
   }
 }
 
+/// 导入失败提示：错误码 + 文案 + 出口按钮（PRD 九.4）。
+class _ImportFailure extends StatelessWidget {
+  const _ImportFailure({required this.failure, required this.onRetry});
+
+  final AppFailure failure;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.error_outline, color: scheme.error),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${failure.code.code} ${failure.message}',
+                style: TextStyle(color: scheme.error),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton(onPressed: onRetry, child: const Text('重新选择')),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _FeatureGrid extends StatelessWidget {
-  const _FeatureGrid();
+  const _FeatureGrid({required this.enabled});
+
+  /// 未导入图片时功能入口置灰（PRD 九.5：可编辑态才允许进入功能页）。
+  final bool enabled;
 
   static const _items = <_FeatureItem>[
     _FeatureItem(Icons.crop, '裁剪', AppRoutes.crop),
@@ -144,6 +191,7 @@ class _FeatureGrid extends StatelessWidget {
           _FeatureCard(
             icon: item.icon,
             title: item.title,
+            enabled: enabled,
             onTap: () => context.push(item.route),
           ),
       ],
@@ -163,26 +211,36 @@ class _FeatureCard extends StatelessWidget {
   const _FeatureCard({
     required this.icon,
     required this.title,
+    required this.enabled,
     required this.onTap,
   });
 
   final IconData icon;
   final String title;
+  final bool enabled;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final color = enabled
+        ? Theme.of(context).colorScheme.primary
+        : Theme.of(context).disabledColor;
     return Card(
       child: InkWell(
-        onTap: onTap,
+        onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(12),
         child: Center(
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: Theme.of(context).colorScheme.primary),
+              Icon(icon, color: color),
               const SizedBox(width: 12),
-              Text(title, style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: color),
+              ),
             ],
           ),
         ),

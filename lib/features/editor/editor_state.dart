@@ -1,5 +1,6 @@
 import '../../services/file/import_service.dart';
 import '../../core/error/app_error.dart';
+import '../../core/image/decode_service.dart';
 
 /// 功能页共用状态机的阶段（对应 PRD 九.5）。
 enum EditorStage {
@@ -45,6 +46,7 @@ class EditorState {
   const EditorState({
     this.stage = EditorStage.empty,
     this.imported,
+    this.decoded,
     this.failure,
     this.phase = ProgressPhase.readingFile,
     this.progress = 0,
@@ -54,6 +56,9 @@ class EditorState {
 
   /// 导入结果（探测成功后有值）。
   final ImportResult? imported;
+
+  /// 解码结果（含预览图与原图尺寸，解码成功后进入可编辑态时有值）。
+  final DecodeResult? decoded;
 
   /// 失败信息（importFailed / exportFailed 时有值）。
   final AppFailure? failure;
@@ -75,6 +80,7 @@ class EditorState {
   EditorState copyWith({
     EditorStage? stage,
     ImportResult? imported,
+    DecodeResult? decoded,
     AppFailure? failure,
     ProgressPhase? phase,
     double? progress,
@@ -83,6 +89,7 @@ class EditorState {
     return EditorState(
       stage: stage ?? this.stage,
       imported: imported ?? this.imported,
+      decoded: decoded ?? this.decoded,
       failure: clearFailure ? null : (failure ?? this.failure),
       phase: phase ?? this.phase,
       progress: progress ?? this.progress,

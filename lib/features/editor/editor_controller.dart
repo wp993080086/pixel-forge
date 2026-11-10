@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/di/providers.dart';
 import '../../core/error/app_error.dart';
+import '../../core/image/decode_policy.dart';
+import '../../core/image/image_header_probe.dart';
 import '../../core/log/app_logger.dart';
 import '../../services/file/import_service.dart';
 import '../editor/editor_state.dart';
@@ -36,11 +39,36 @@ class EditorController extends Notifier<EditorState> {
         _fail(AppErrorCode.corruptedFile);
         return;
       }
-      // TODO: 解码与预览生成（PRD 九.3 延迟渲染）——待解码链路落地后填充，
-      // 此处先进入可编辑态以便打通状态流转。
+      // 像素预检（PRD 九.3（2））：解码前仅读文件头取宽高，超限直接拒绝。
+      // Dart 的 OOM 是进程级 crash、catch 不住，故必须在此前置拦截。
+      final dims = ImageHeaderProbe.probe(result.bytes, result.format!);
+      if (dims != null) {
+        final maxPixels = ref.read(capabilitiesProvider).maxPixels;
+        if (DecodePolicy.exceedsLimit(dims, maxPixels)) {
+          _fail(
+            AppErrorCode.pixelLimitExceeded,
+            context: {
+              '像素': '${(dims.pixels / 1000000).toStringAsFixed(1)}MP',
+              '上限': '${maxPixels ~/ 1000000}MP',
+            },
+          );
+          return;
+        }
+      }
+      // 解码 + 生成预览图（PRD 九.3）：在子 Isolate 执行，UI 不阻塞。
+      state = state.copyWith(stage: EditorStage.decoding);
+      final decoded = await ref
+          .read(decodeServiceProvider)
+          .decodePreview(result.bytes);
+      if (decoded == null) {
+        // 头部可识别但解码失败 → 文件损坏
+        _fail(AppErrorCode.corruptedFile);
+        return;
+      }
       state = state.copyWith(
         stage: EditorStage.editable,
         imported: result,
+        decoded: decoded,
         clearFailure: true,
       );
     } catch (e, st) {
