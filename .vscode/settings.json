@@ -10,5 +10,25 @@
     "editor.rulers": [80]
   },
   "dart.flutterSdkPath": null,
-  "dart.runPubGetOnPubspecChanges": "always"
+  "dart.runPubGetOnPubspecChanges": "always",
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#f3a4b7",
+    "activityBar.background": "#f3a4b7",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#308d13",
+    "activityBarBadge.foreground": "#e7e7e7",
+    "commandCenter.border": "#15202b99",
+    "statusBar.background": "#ed7793",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#e74a6f",
+    "statusBarItem.remoteBackground": "#ed7793",
+    "statusBarItem.remoteForeground": "#15202b",
+    "tab.activeBorder": "#f3a4b7",
+    "titleBar.activeBackground": "#ed7793",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#ed779399",
+    "titleBar.inactiveForeground": "#15202b99"
+  },
+  "peacock.color": "#ed7793"
 }

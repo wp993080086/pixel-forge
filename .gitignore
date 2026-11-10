@@ -51,6 +51,8 @@ app.*.map.json
 /android/app/release
 
 # 本地工具与临时目录
-.agents/
+# .agents/rules 为团队共享规范，需纳入版本控制；仅忽略本地日志产物
+.agents/*
+!.agents/rules/
 .workbuddy/
 .temp/
